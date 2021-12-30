@@ -469,12 +469,11 @@ def usr_get_avg():
 
 #====================================================================
 # read a log file and put them in the DB
-@bp.route('/usr/insert/test', methods=["POST", "GET"])
+@bp.route('/log/insert', methods=["POST", "GET"])
 def usr_log_insert_test():
     db_log = mg_db.loginfo
-    # print("log_insert")
     i = 0
-    file = open("/your/file/name", 'r')
+    file = open("/your/log/file/routes", 'r')
     lines = file.readlines()
 
     start = time.time()
