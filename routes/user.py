@@ -474,7 +474,7 @@ def usr_log_insert_test():
     db_log = mg_db.loginfo
     # print("log_insert")
     i = 0
-    file = open("/home/jykim/DMP/main/log/data.log", 'r')
+    file = open("/your/file/name", 'r')
     lines = file.readlines()
 
     start = time.time()
