@@ -467,3 +467,88 @@ def usr_get_avg():
     return ProductDAO().get_avg(prod_id, state_id)
 
 
+#====================================================================
+# read a log file and put them in the DB
+@bp.route('/usr/insert/test', methods=["POST", "GET"])
+def usr_log_insert_test():
+    db_log = mg_db.loginfo
+    # print("log_insert")
+    i = 0
+    file = open("/home/jykim/DMP/main/log/data.log", 'r')
+    lines = file.readlines()
+
+    start = time.time()
+    for line in lines:
+        line = line.strip()
+        data = line.split(' ')
+
+        pinfo_lst = data[6].split(":")[0].split('_')
+        
+        # prod_info 
+        if pinfo_lst[0] == "NULL":
+            prod_info = "NULL"
+            price = "NULL"
+            dc_price = "NULL"
+            prchs_price = "NULL"
+            amount = "NULL"
+        else:
+            prod_info = pinfo_lst[0]
+            price = pinfo_lst[4]
+            dc_price = pinfo_lst[5]
+            prchs_price = pinfo_lst[6]
+            amount = pinfo_lst[3]
+
+        find = db_log.find_one({'usr.uid': data[3]})
+
+        if(find == None):
+            usr_info = {
+                        "uid": data[3], 
+                        "uid_type": data[2]
+                        }
+            pro_info = {
+                        "id": prod_info,
+                        "bundle": data[4], 
+                        "action": 
+                            {data[1]: data[0]}
+                        }
+            ord_info = {
+                        "ord_id": data[5], 
+                        "price": price, 
+                        "discount_price": dc_price,
+                        "purchase_price": prchs_price, 
+                        "amount": amount
+                        }
+            output = {
+                        "usr": usr_info,
+                        "products": [pro_info],
+                        "order": [ord_info]
+                    }
+            i += 1
+            db_log.insert_one(output)
+
+
+        else:
+            prod_add = {'id': pinfo_lst[0],
+                        'bundle': data[4],
+                        'action': {
+                                    data[1]: data[0]
+                                }
+                        }
+            order_add = {"ord_id": data[5], 
+                        "price": price, 
+                        "discount_price": dc_price,
+                        "purchase_price": prchs_price, 
+                        "amount": amount
+                        }
+
+            db_log.update_one({'usr.uid': data[3]},
+                                {'$push': {
+                                    'products': prod_add,
+                                    'order' : order_add
+                                    }
+                            })
+
+        file.close()
+    print(i)
+    print(time.time() - start)
+    return f'{i} data insert completed'
